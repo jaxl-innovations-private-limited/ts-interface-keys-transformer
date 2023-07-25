@@ -47,7 +47,7 @@ const visitNode = (node: ts.Node, program: ts.Program): ts.Node => {
     properties = [ ...properties, ...getSymbolProperties(symbol, [], symbolMap) ];
   });
 
-  return ts.createArrayLiteral(properties.map(property => ts.createRegularExpressionLiteral(JSON.stringify(property))));
+  return ts.factory.createArrayLiteralExpression(properties.map(property => ts.factory.createRegularExpressionLiteral(JSON.stringify(property))));
 };
 
 const getSymbolProperties = (symbol: ts.Symbol, outerLayerProperties: Property[], symbolMap: Map<string, ts.Symbol>): Property[] => {
@@ -63,7 +63,7 @@ const getSymbolProperties = (symbol: ts.Symbol, outerLayerProperties: Property[]
     return !!declaration.questionToken;
   });
   const modifiers: string[] = [];
-  symbol.declarations.forEach((declaration: any) => {
+  symbol.declarations?.forEach((declaration: any) => {
     if (declaration.modifiers) {
       declaration.modifiers.forEach((modifier: ts.Token<ts.SyntaxKind.ReadonlyKeyword>) => {
         modifiers.push(getModifierType(modifier));
@@ -87,7 +87,7 @@ const getSymbolProperties = (symbol: ts.Symbol, outerLayerProperties: Property[]
         return getSymbolProperties(member.symbol, [], symbolMap);
       }));
     } else {
-      const members = symbolMap.has(elementType) ? (symbolMap.get(elementType)!['declarations'][0] as any).members : [];
+      const members = symbolMap.has(elementType) && symbolMap.get(elementType)!.declarations?.length !== 0 ? (symbolMap.get(elementType)!['declarations']![0] as any).members : [];
       if (members && members.length > 0) {
         property.elementKeys = _.flattenDeep(members.map((member: any) => {
           return getSymbolProperties(member.symbol, [], symbolMap);
@@ -101,7 +101,7 @@ const getSymbolProperties = (symbol: ts.Symbol, outerLayerProperties: Property[]
     if (symbol.valueDeclaration['type']['typeArguments'][0].typeName) {
       type = symbol.valueDeclaration['type']['typeArguments'][0].typeName.escapedText;
     }
-    const members = symbolMap.has(type) ? (symbolMap.get(type)!['declarations'][0] as any).members : symbol.valueDeclaration['type']['typeArguments'][0].members;
+    const members = symbolMap.has(type) && symbolMap.get(type)!.declarations?.length !== 0 ? (symbolMap.get(type)!['declarations']![0] as any).members : symbol.valueDeclaration['type']['typeArguments'][0].members;
     property.elementKeys = _.flattenDeep(members.map((member: any) => {
       return getSymbolProperties(member.symbol, [], symbolMap);
     }));

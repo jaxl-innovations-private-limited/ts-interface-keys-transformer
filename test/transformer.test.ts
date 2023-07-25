@@ -53,7 +53,7 @@ describe('Test transformer.', () => {
         "name": "g",
         "modifiers": [],
         "optional": false,
-        "type": "null"
+        "type": "unknown"
       }
     ]);
   });
